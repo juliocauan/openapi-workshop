@@ -1,8 +1,8 @@
 import { Component, OnInit } from '@angular/core';
 import { ProductService } from '../services/product.service';
-import { NewProduct, Product } from '../models/product.model';
 import { FormsModule } from '@angular/forms';
 import { CommonModule } from '@angular/common';
+import { NovoProduto, Produto, ProdutosService } from '../../../generated';
 
 @Component({
   selector: 'app-product-form',
@@ -12,9 +12,9 @@ import { CommonModule } from '@angular/common';
   styleUrls: ['./product-form.component.css']
 })
 export class ProductFormComponent implements OnInit {
-  products: Product[] = [];
-  newProduct: NewProduct = { nome: '', preco: 0 };
-  selectedProduct: Product | null = null;
+  products: Produto[] = [];
+  newProduct: NovoProduto = { nome: '', preco: 0 };
+  selectedProduct: Produto | null = null;
   message: string | null = null;
   messageClass: string = '';
   loading: boolean = false;
@@ -22,7 +22,7 @@ export class ProductFormComponent implements OnInit {
   isEditing: boolean = false;
   editingId: number | null = null;
 
-  constructor(private productService: ProductService) { }
+  constructor(private productService: ProdutosService) { }
 
   ngOnInit() {
     this.loadProducts();
@@ -100,7 +100,7 @@ export class ProductFormComponent implements OnInit {
     });
   }
 
-  editProduct(product: Product) {
+  editProduct(product: Produto) {
     this.isEditing = true;
     this.editingId = product.id;
     this.newProduct = {

@@ -1,0 +1,260 @@
+openapi: 3.0.4
+info:
+  contact:
+    email: juliocauan@gmail.com
+    name: Equipe de Desenvolvimento
+  description: |
+    Documentação da API RESTful para gerenciamento de produtos.
+    Este documento reflete o contrato **ideal** da API, visando a correção das inconsistências de rotas e schemas presentes na implementação inicial.
+  title: API de Catálogo de Produtos
+  version: 1.0.0
+servers:
+- description: Servidor Local de Desenvolvimento
+  url: http://localhost:3000
+tags:
+- description: Operações relacionadas à gestão do catálogo de produtos
+  name: produtos
+paths:
+  /produtos:
+    get:
+      description: Retorna uma lista paginada ou completa de produtos.
+      operationId: getProducts
+      responses:
+        "200":
+          content:
+            application/json:
+              schema:
+                items:
+                  $ref: "#/components/schemas/Produto"
+                type: array
+          description: Lista de produtos retornada com sucesso.
+        "500":
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Erro"
+          description: Erro inesperado no servidor.
+      summary: Lista todos os produtos
+      tags:
+      - produtos
+      x-eov-operation-handler: controllers/ProdutosController
+    post:
+      description: Cria um novo item no catálogo de produtos.
+      operationId: createProduct
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/NovoProduto"
+        required: true
+      responses:
+        "201":
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Produto"
+          description: Produto criado com sucesso. Retorna o objeto completo.
+        "400":
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Erro"
+          description: "Requisição inválida (parâmetros ausentes, formato incorreto)."
+        "500":
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Erro"
+          description: Erro inesperado no servidor.
+      summary: Cadastra um novo produto
+      tags:
+      - produtos
+      x-eov-operation-handler: controllers/ProdutosController
+  /produtos/{id}:
+    delete:
+      operationId: deleteProduct
+      parameters:
+      - description: ID único do produto.
+        explode: false
+        in: path
+        name: id
+        required: true
+        schema:
+          format: int64
+          type: integer
+        style: simple
+      responses:
+        "204":
+          description: Produto removido com sucesso. (Sem conteúdo)
+        "404":
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Erro"
+          description: Recurso não encontrado (ID inexistente).
+        "500":
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Erro"
+          description: Erro inesperado no servidor.
+      summary: Remove um produto por ID
+      tags:
+      - produtos
+      x-eov-operation-handler: controllers/ProdutosController
+    get:
+      operationId: getProductById
+      parameters:
+      - description: ID único do produto.
+        explode: false
+        in: path
+        name: id
+        required: true
+        schema:
+          format: int64
+          type: integer
+        style: simple
+      responses:
+        "200":
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Produto"
+          description: Produto encontrado.
+        "404":
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Erro"
+          description: Recurso não encontrado (ID inexistente).
+        "500":
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Erro"
+          description: Erro inesperado no servidor.
+      summary: Obtém produto por ID
+      tags:
+      - produtos
+      x-eov-operation-handler: controllers/ProdutosController
+    put:
+      operationId: updateProduct
+      parameters:
+      - description: ID único do produto.
+        explode: false
+        in: path
+        name: id
+        required: true
+        schema:
+          format: int64
+          type: integer
+        style: simple
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/NovoProduto"
+        required: true
+      responses:
+        "200":
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Produto"
+          description: Produto atualizado com sucesso.
+        "400":
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Erro"
+          description: "Requisição inválida (parâmetros ausentes, formato incorreto)."
+        "404":
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Erro"
+          description: Recurso não encontrado (ID inexistente).
+        "500":
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Erro"
+          description: Erro inesperado no servidor.
+      summary: Atualiza um produto existente
+      tags:
+      - produtos
+      x-eov-operation-handler: controllers/ProdutosController
+components:
+  responses:
+    BadRequest:
+      content:
+        application/json:
+          schema:
+            $ref: "#/components/schemas/Erro"
+      description: "Requisição inválida (parâmetros ausentes, formato incorreto)."
+    NotFound:
+      content:
+        application/json:
+          schema:
+            $ref: "#/components/schemas/Erro"
+      description: Recurso não encontrado (ID inexistente).
+    ServerError:
+      content:
+        application/json:
+          schema:
+            $ref: "#/components/schemas/Erro"
+      description: Erro inesperado no servidor.
+  schemas:
+    Produto:
+      example:
+        preco: 6.0274563
+        em_estoque: true
+        nome: nome
+        id: 0
+      properties:
+        id:
+          description: Identificador único do produto.
+          format: int64
+          type: integer
+        nome:
+          description: Nome descritivo do produto.
+          type: string
+        preco:
+          description: Preço de venda do produto.
+          format: float
+          type: number
+        em_estoque:
+          description: Indica se há unidades disponíveis em estoque.
+          type: boolean
+      required:
+      - id
+      - nome
+      - preco
+      type: object
+    NovoProduto:
+      example:
+        preco: 0.8008282
+        nome: nome
+      properties:
+        nome:
+          type: string
+        preco:
+          description: O preço de venda. (Corrigido para 'preco')
+          format: float
+          type: number
+      required:
+      - nome
+      - preco
+      type: object
+    Erro:
+      example:
+        codigo: 1
+        mensagem: mensagem
+      properties:
+        mensagem:
+          description: Descrição amigável do erro.
+          type: string
+        codigo:
+          description: Código de erro interno.
+          type: integer
+      type: object
