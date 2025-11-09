@@ -1,0 +1,198 @@
+openapi: 3.0.4
+info:
+  title: API de Catálogo de Produtos
+  description: |
+    Documentação da API RESTful para gerenciamento de produtos.
+    Este documento reflete o contrato **ideal** da API, visando a correção das inconsistências de rotas e schemas presentes na implementação inicial.
+  version: 1.0.0
+  contact:
+    name: Equipe de Desenvolvimento
+    email: juliocauan@gmail.com
+
+servers:
+  - url: http://localhost:3000
+    description: Servidor Local de Desenvolvimento
+
+tags:
+  - name: produtos
+    description: Operações relacionadas à gestão do catálogo de produtos
+
+paths:
+  /produtos:
+    get:
+      tags:
+        - produtos
+      summary: Lista todos os produtos
+      description: Retorna uma lista paginada ou completa de produtos.
+      operationId: getProducts
+      responses:
+        '200':
+          description: Lista de produtos retornada com sucesso.
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/Produto' # Referencia o schema completo
+        '500':
+          $ref: '#/components/responses/ServerError'
+
+    post:
+      tags:
+        - produtos
+      summary: Cadastra um novo produto
+      description: Cria um novo item no catálogo de produtos.
+      operationId: createProduct
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/NovoProduto' # Usa o schema de input padronizado
+      responses:
+        '201':
+          description: Produto criado com sucesso. Retorna o objeto completo.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Produto'
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '500':
+          $ref: '#/components/responses/ServerError'
+
+  /produtos/{id}:
+    parameters:
+      - name: id
+        in: path
+        description: ID único do produto.
+        required: true
+        schema:
+          type: integer
+          format: int64 # Tipo de dado padronizado para o ID
+    
+    get:
+      tags:
+        - produtos
+      summary: Obtém produto por ID
+      operationId: getProductById
+      responses:
+        '200':
+          description: Produto encontrado.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Produto'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '500':
+          $ref: '#/components/responses/ServerError'
+
+    put:
+      tags:
+        - produtos
+      summary: Atualiza um produto existente
+      operationId: updateProduct
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/NovoProduto' # Reutiliza o schema de input
+      responses:
+        '200':
+          description: Produto atualizado com sucesso.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Produto'
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '500':
+          $ref: '#/components/responses/ServerError'
+
+    delete:
+      tags:
+        - produtos
+      summary: Remove um produto por ID
+      operationId: deleteProduct
+      responses:
+        '204':
+          description: Produto removido com sucesso. (Sem conteúdo)
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '500':
+          $ref: '#/components/responses/ServerError'
+
+
+components:
+  schemas:
+    # 1. Schema Completo (Output) - Padronizado: snake_case e ID int64
+    Produto:
+      type: object
+      required:
+        - id
+        - nome
+        - preco
+      properties:
+        id:
+          type: integer
+          format: int64
+          description: Identificador único do produto.
+        nome:
+          type: string
+          description: Nome descritivo do produto.
+        preco:
+          type: number
+          format: float
+          description: Preço de venda do produto.
+        em_estoque:
+          type: boolean
+          description: Indica se há unidades disponíveis em estoque.
+
+    # 2. Schema de Criação (Input)
+    NovoProduto:
+      type: object
+      required:
+        - nome
+        - preco
+      properties:
+        nome:
+          type: string
+        preco:
+          type: number
+          format: float
+          description: O preço de venda. (Corrigido para 'preco')
+
+    # 3. Schema de Erro Padrão (Reutilizável)
+    Erro:
+      type: object
+      properties:
+        mensagem:
+          type: string
+          description: Descrição amigável do erro.
+        codigo:
+          type: integer
+          description: Código de erro interno.
+
+  responses:
+    BadRequest:
+      description: Requisição inválida (parâmetros ausentes, formato incorreto).
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/Erro'
+    NotFound:
+      description: Recurso não encontrado (ID inexistente).
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/Erro'
+    ServerError:
+      description: Erro inesperado no servidor.
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/Erro'
